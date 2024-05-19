@@ -3,14 +3,14 @@
 # Author: Roberto Rodriguez (@Cyb3rWard0g)
 # License: GPL-3.0
 
-FROM otrf/helk-base:0.0.4
+FROM docker-helk-base
 LABEL maintainer="Roberto Rodriguez @Cyb3rWard0g"
 LABEL description="Dockerfile base for the HELK Kafka."
 
 ENV DEBIAN_FRONTEND noninteractive
 
 # *********** Kafka Variables ***************
-ENV KAFKA_VERSION=2.4.1
+ENV KAFKA_VERSION=3.7.0
 ENV SCALA_VERSION=2.13
 ENV KAFKA_LOGS_PATH=/var/log/kafka
 ENV KAFKA_CONSOLE_LOG=/var/log/kafka/helk-kafka.log

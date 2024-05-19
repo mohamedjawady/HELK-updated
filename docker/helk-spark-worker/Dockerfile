@@ -3,7 +3,7 @@
 # Author: Roberto Rodriguez (@Cyb3rWard0g)
 # License: GPL-3.0
 
-FROM otrf/helk-spark-base:2.4.5
+FROM docker-helk-spark-base
 LABEL maintainer="Roberto Rodriguez @Cyb3rWard0g"
 LABEL description="Dockerfile base for HELK Spark Worker."
 
@@ -20,13 +20,13 @@ USER ${SPARK_USER}
 # https://github.com/ContinuumIO/anaconda-issues/issues/11148
 RUN mkdir ${SPARK_HOME}/.conda \
   && cd /tmp \
-  && wget --quiet https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/anaconda.sh \
+  && wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/anaconda.sh \
   && /bin/bash ~/anaconda.sh -b -p ${CONDA_DIR} \
   && rm ~/anaconda.sh \
   && conda config --system --prepend channels conda-forge \
   && conda install --quiet --yes conda-build \
   && conda install --quiet --yes \
-    'python=3.7.5' \
+    'python=3.12.2' \
   && conda update --all --quiet --yes \
   # *********** Clean *****************
   && conda clean -tipcy \
