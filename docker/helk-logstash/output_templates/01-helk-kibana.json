@@ -1,13 +1,18 @@
 {
-  "order": 999,
+  "priority": 999,
   "index_patterns": [
     ".kibana*"
   ],
   "version": 2019111101,
-  "settings": {
-    "index": {
-      "priority": 100
-    },
-    "number_of_replicas": 1
+  "template": {
+    "settings": {
+      "index": {
+        "priority": 100
+      },
+      "number_of_replicas": 1
+    }
+  },
+  "data_stream": {
+    "hidden": false
   }
 }
