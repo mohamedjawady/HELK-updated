@@ -1,0 +1,59 @@
+services:
+  helk-base:
+    build: helk-base/
+    container_name: helk-base
+  helk-kafka-base:
+    build: helk-kafka-base/
+    container_name: helk-kafka-base
+    depends_on:
+      - helk-base
+  helk-jupyter-base:
+    build: helk-jupyter-base/
+    container_name: helk-jupyter-base
+    environment:
+      JUPYTER_TYPE: lab
+      JUPYTER_BASE_URL: /jupyter
+    restart: always
+    networks:
+      helk:
+  helk-jupyter-pyspark:
+    build: helk-jupyter-pyspark/
+    container_name: helk-jupyter-pyspark
+    depends_on:
+      - helk-jupyter-base
+    environment:
+      JUPYTER_TYPE: notebook
+      JUPYTER_BASE_URL: /jupyter
+    restart: always
+    networks:
+      helk:
+  helk-jupyter-hunt:
+    build: helk-jupyter-hunt/
+    container_name: helk-jupyter-hunt
+    depends_on:
+      - helk-jupyter-pyspark
+    volumes:
+      - notebooks:/opt/jupyter/notebooks
+    environment:
+      JUPYTER_TYPE: lab
+      JUPYTER_BASE_URL: /jupyter
+    ports:
+      - "8888:8888"
+    restart: always
+    networks:
+      helk:
+  helk-spark-base:
+    build: helk-spark-base/
+    container_name: helk-spark-base
+    depends_on:
+      - helk-base
+
+networks:
+  helk:
+    driver: bridge
+
+volumes:
+  esdata:
+    driver: local
+  notebooks:
+    driver: local

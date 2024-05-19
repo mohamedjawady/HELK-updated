@@ -1,8 +1,6 @@
-version: '3.5'
-
 services:
   helk-elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
+    build: helk-elasticsearch/
     container_name: helk-elasticsearch
     logging:
       driver: "json-file"
@@ -35,7 +33,7 @@ services:
     networks:
       helk:
   helk-logstash:
-    image: otrf/helk-logstash:7.6.2.1
+    build: helk-logstash/
     container_name: helk-logstash
     logging:
       driver: "json-file"
@@ -54,7 +52,7 @@ services:
     - xpack.monitoring.enabled=true
     - xpack.monitoring.elasticsearch.hosts=http://helk-elasticsearch:9200
     - log.level=warn
-    - "HELK_LOGSTASH_JAVA_OPTS=-XX:-UseConcMarkSweepGC -XX:-UseCMSInitiatingOccupancyOnly -XX:+UseG1GC"
+    - "HELK_LOGSTASH_JAVA_OPTS=-XX:+UseG1GC"
     ports:
       - "5044:5044"
       - "8531:8531"
@@ -71,7 +69,7 @@ services:
     networks:
       helk:
   helk-kibana:
-    image: docker.elastic.co/kibana/kibana:7.6.2
+    build: helk-kibana/
     container_name: helk-kibana
     logging:
       driver: "json-file"
@@ -92,7 +90,7 @@ services:
     networks:
       helk:
   helk-nginx:
-    image: otrf/helk-nginx:0.3.0
+    build: helk-nginx/
     container_name: helk-nginx
     logging:
       driver: "json-file"
@@ -114,9 +112,9 @@ services:
       - helk-kibana
     networks:
       helk:
-  helk-zookeeper:
-    image: otrf/helk-zookeeper:2.4.0
-    container_name: helk-zookeeper
+  helk-kraft-controller:
+    build: helk-kraft-controller/
+    container_name: helk-kraft-controller
     logging:
       driver: "json-file"
       options:
@@ -125,10 +123,24 @@ services:
     restart: always
     depends_on:
       - helk-logstash
+    environment:
+      KAFKA_CLUSTER_ID: q1Sh-9_ISia_zwGINzRvyQ
+      KAFKA_ROLE: controller
+      KAFKA_NODE_ID: 1
+      KAFKA_BROKER_NAME: helk-kafka-broker
+      KAFKA_BROKER_PORT: 9092
+      REPLICATION_FACTOR: 1
+      ADVERTISED_LISTENER: ${ADVERTISED_LISTENER}
+      CONTROLLER_NAME: helk-kraft-controller
+      KAFKA_CREATE_TOPICS: winlogbeat, winevent, SYSMON_JOIN, filebeat, zeek
+      KAFKA_HEAP_OPTS: -Xmx1G -Xms256M
+      LOG_RETENTION_HOURS: 4
+    ports:
+      - "9093:9093"
     networks:
       helk:
   helk-kafka-broker:
-    image: otrf/helk-kafka-broker:2.4.0
+    build: helk-kafka-broker/
     container_name: helk-kafka-broker
     logging:
       driver: "json-file"
@@ -137,14 +149,16 @@ services:
         max-size: "1m"
     restart: always
     depends_on:
-      - helk-zookeeper
+      - helk-kraft-controller
     environment:
+      KAFKA_CLUSTER_ID: q1Sh-9_ISia_zwGINzRvyQ
       KAFKA_BROKER_NAME: helk-kafka-broker
-      KAFKA_BROKER_ID: 1
+      KAFKA_ROLE: broker
+      KAFKA_NODE_ID: 2
       KAFKA_BROKER_PORT: 9092
       REPLICATION_FACTOR: 1
       ADVERTISED_LISTENER: ${ADVERTISED_LISTENER}
-      ZOOKEEPER_NAME: helk-zookeeper
+      CONTROLLER_NAME: helk-kraft-controller
       KAFKA_CREATE_TOPICS: winlogbeat, winevent, SYSMON_JOIN, filebeat, zeek
       KAFKA_HEAP_OPTS: -Xmx1G -Xms256M
       LOG_RETENTION_HOURS: 4
@@ -153,7 +167,7 @@ services:
     networks:
       helk:
   helk-ksql-server:
-    image: confluentinc/ksqldb-server:latest
+    build: helk-ksql-server/
     container_name: helk-ksql-server
     logging:
       driver: "json-file"
@@ -178,7 +192,7 @@ services:
     networks:
       helk:
   helk-ksql-cli:
-    image: confluentinc/ksqldb-cli:latest
+    build: helk-ksql-cli/
     container_name: helk-ksql-cli
     logging:
       driver: "json-file"
@@ -212,7 +226,7 @@ services:
     networks:
       helk:
   helk-spark-master:
-    image: otrf/helk-spark-master:2.4.5
+    build: helk-spark-master/
     container_name: helk-spark-master
     logging:
       driver: "json-file"
@@ -230,7 +244,7 @@ services:
     networks:
       helk:
   helk-spark-worker:
-    image: otrf/helk-spark-worker:2.4.5
+    build: helk-spark-worker/
     container_name: helk-spark-worker
     logging:
       driver: "json-file"
