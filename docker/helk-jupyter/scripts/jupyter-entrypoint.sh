@@ -10,14 +10,17 @@
 NOTEBOOK_INFO_TAG="[NOTEBOOK-JUPYTER-DOCKER-INSTALLATION-INFO]"
 NOTEBOOK_ERROR_TAG="[NOTEBOOK-JUPYTER-DOCKER-INSTALLATION-ERROR]"
 
+chmod +x $SPARK_HOME/sbin/spark-worker-entrypoint.sh
+$SPARK_HOME/sbin/spark-worker-entrypoint.sh
+
 # ************ Starting Postgresql for Spark ****************
 PGDATA=${PGDATA:-/home/jupyter/srv/pgsql}
  
 if [ ! -d "$PGDATA" ]; then
-  /usr/lib/postgresql/10/bin/initdb -D "$PGDATA" --auth-host=md5 --encoding=UTF8
+  /usr/lib/postgresql/16/bin/initdb -D "$PGDATA" --auth-host=md5 --encoding=UTF8
 fi
 echo "$NOTEBOOK_INFO_TAG The files in this database system will be owned by user jupyter.."
-/usr/lib/postgresql/10/bin/pg_ctl -D "$PGDATA" status || /usr/lib/postgresql/10/bin/pg_ctl -D "$PGDATA" -l "$PGDATA/pg.log" start
+/usr/lib/postgresql/16/bin/pg_ctl -D "$PGDATA" status || /usr/lib/postgresql/16/bin/pg_ctl -D "$PGDATA" -l "$PGDATA/pg.log" start
 
 # ************ Checking if user hive exists ****************
 echo "$NOTEBOOK_INFO_TAG Checking if user hive already exists.."
