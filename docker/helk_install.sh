@@ -6,8 +6,8 @@
 # Author: Roberto Rodriguez (@Cyb3rWard0g)
 # License: GPL-3.0
 
-HELK_BUILD_VERSION="v0.1.9-alpha10082020"
-HELK_ELK_VERSION="7.6.2"
+HELK_BUILD_VERSION="v0.2.1-alpha09122023"
+HELK_ELK_VERSION="8.13.4"
 SUBSCRIPTION_CHOICE="basic"
 
 # *********** Helk log tagging variables ***************
@@ -272,7 +272,7 @@ install_docker() {
 install_docker_compose() {
   echo "$HELK_INFO_TAG Installing docker-compose.."
   # Freeze docker-compose at version 1.27.4 due to glibc version requirements in 1.28 not matching recommended distros for HELK
-  curl -L https://github.com/docker/compose/releases/download/1.27.4/docker-compose-"$(uname -s)"-"$(uname -m)" -o /usr/local/bin/docker-compose >>$LOGFILE 2>&1
+  curl -L https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-"$(uname -s)"-"$(uname -m)" -o /usr/local/bin/docker-compose >>$LOGFILE 2>&1
   chmod +x /usr/local/bin/docker-compose >>$LOGFILE 2>&1
   if [ "$LSB_DIST" == "centos" ]; then
     # Link docker-compose so can be used with sudo
@@ -359,6 +359,7 @@ build_helk() {
   export ADVERTISED_LISTENER=$HOST_IP
 
   echo "$HELK_INFO_TAG Building & running HELK from $COMPOSE_CONFIG file.."
+  docker-compose -f helk-base-images.yml build >>$LOGFILE 2>&1
   docker-compose -f $COMPOSE_CONFIG up --build -d >>$LOGFILE 2>&1
   ERROR=$?
   if [ $ERROR -ne 0 ]; then
@@ -509,7 +510,7 @@ prepare_helk() {
 
 get_jupyter_credentials() {
   if [[ ${HELK_BUILD} == "helk-kibana-notebook-analysis" ]] || [[ ${HELK_BUILD} == "helk-kibana-notebook-analysis-alert" ]]; then
-    until (docker logs helk-jupyter 2>&1 | grep -q "The Jupyter Notebook is running at"); do sleep 5; done
+    until (docker logs helk-jupyter 2>&1 | grep -qE 'Jupyter Server|is running at:'); do sleep 5; done
     jupyter_token="$(docker exec -i helk-jupyter jupyter notebook list | grep "token" | sed 's/.*token=\([^ ]*\).*/\1/')" >>$LOGFILE 2>&1
     echo "HELK JUPYTER CURRENT TOKEN: ${jupyter_token}"
   fi
@@ -554,7 +555,7 @@ show_final_information() {
     echo "HELK KIBANA USER: helk"
     echo "HELK KIBANA PASSWORD: ${KIBANA_UI_PASSWORD_INPUT}"
   fi
-  echo "HELK ZOOKEEPER: ${HOST_IP}:2181"
+  echo "HELK KRAFT CONTROLLER: ${HOST_IP}:9092"
   echo "HELK KSQL SERVER: ${HOST_IP}:8088"
   echo " "
   echo "IT IS HUNTING SEASON!!!!!"
