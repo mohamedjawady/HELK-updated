@@ -22,12 +22,18 @@ function importFile
     local retry=${2}
 
     response=$(
-    curl -sk -XPOST -u "${ELASTICSEARCH_CREDS}" \
+    while ! curl -L -sk -X POST -u "${ELASTICSEARCH_CREDS}" \
         "${KIBANA_HOST}/api/saved_objects/_import?overwrite=true" \
         -H "kbn-xsrf: true" \
         --form file=@"${file}"
+    do
+        { echo "Exit status of curl: $?"
+            echo "Retrying ..."
+        } 1>&2
+        sleep 5
+    done
     )
-    result=$(echo "${response}" | grep -w "success" | cut -d ',' -f 1 | cut -d ':' -f 2 | sed -E 's/[^-[:alnum:]]//g')
+    result=$(echo "${response}" | grep -w "success" | cut -d ',' -f 2 | cut -d ':' -f 2 | sed -E 's/[^-[:alnum:]]//g')
     if [[ "${result}" == "true" ]]; then
         created=$((created+1))
         echo "Successfuly imported ${item} named ${file}"
