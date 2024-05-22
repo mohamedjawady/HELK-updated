@@ -11,8 +11,5 @@
       },
       "number_of_replicas": 1
     }
-  },
-  "data_stream": {
-    "hidden": false
   }
 }
