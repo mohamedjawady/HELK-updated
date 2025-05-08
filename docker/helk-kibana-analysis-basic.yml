@@ -21,6 +21,9 @@ services:
       - xpack.license.self_generated.type=basic
       - xpack.security.enabled=false
       #- "HELK_ES_MEMORY=-Xms$2g -Xmx2g"
+    ports:
+      - "9200:9200"  # Add this line to expose Elasticsearch
+      - "9300:9300"  # Optional: also expose the transport port
     ulimits:
       memlock:
         soft: -1
