@@ -81,3 +81,8 @@ cluster.initial_master_nodes: ["helk-1"]
 # Allow wildcard deletion of indices:
 #
 #action.destructive_requires_name: false
+
+http.cors.allow-origin: "*" # Only use unrestricted value for local development
+# Use a specific origin value in production, like `http.cors.allow-origin: "https://<my-website-domain.example>"`
+http.cors.enabled: true
+http.cors.allow-credentials: true
